@@ -2,7 +2,33 @@
 # -*- coding: utf-8 -*-
 
 '''
-Aleph configuration files have two styles of defining column names. Currently this script supports only one of them.
+ *
+ * @licstart  The following is the entire license notice for the Python code in this file.
+ *
+ * Parser for Aleph configuration files
+ *
+ * Copyright (C) 2017 University Of Helsinki (The National Library Of Finland)
+ *
+ * aleph-conf-parser program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * aleph-conf-parser is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @licend  The above is the entire license notice
+ * for the Python code in this file.
+ *
+'''
+
+'''
+Aleph configuration files have (at least) two styles of defining column names. Currently this script supports only one of them.
 '''
 
 import sys, re
