@@ -3,7 +3,7 @@
 
 '''
  *
- * @licstart  The following is the entire license notice for the Python code in this file.
+ * The following is the entire license notice for the Python code in this file.
  *
  * Parser for Aleph configuration files
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @licend  The above is the entire license notice
+ * The above is the entire license notice
  * for the Python code in this file.
  *
 '''
