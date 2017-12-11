@@ -80,6 +80,19 @@ def parse_row(blocks, data):
         my_data.append(data[s])
     return my_data
 
+# Get empty space index
+def parse_empty(blocks):
+    my_data = []
+    my_empty = []
+    current_index = 0
+    for i in blocks:
+        end = current_index + int(i[0])
+        my_data.append((current_index, end))
+        current_index += i[0] + i[1]
+    for i in range(len(my_data) - 1):
+        my_empty.append((my_data[i][1], my_data[i+1][0]))
+    return my_empty
+
 # Input: List of all rows, returns list of lists
 def parse_all(blocks, data):
     my_data = []
@@ -116,13 +129,28 @@ def get_titles(data):
             keep_next = 1
     return my_titles
 
+# Check empty spaces for invalid values
+def check_errors(blocks, values):
+    empty_index = parse_empty(blocks)
+    for i in values:
+        found = 0
+        for j, h in empty_index:
+            empty_block = i[j:h]
+            empty_block = re.sub(r'\s+', '', empty_block)
+            if (re.compile(r'\S').search(empty_block)) is not None:
+                found = 1
+        if found == 1:
+            print("ERROR: Invalid value found in empty space at following line:")
+            print(i)
+
 # Check if file is given in arguments
-if len(sys.argv) != 2:
-    print("Usage: $0 <file>")
+if len(sys.argv) != 3:
+    print("Usage: $0 <file> <option>")
+    print("Options: print/check")
     sys.exit()
 
-
 filename = sys.argv[1]
+option = sys.argv[2]
 increase_last_block_size = 1 #Overrides last block size with 100
 full_data = read_file(filename)
 config_values = drop_comments(full_data)
@@ -133,13 +161,18 @@ configurations = parse_all(data_blocks, config_values)
 # Aleph configs titles aren't consistent. Could make option for custom titles.
 titles = get_titles(full_data)
 
+if option == "print":
 
-# Printing file information
-print("File: " + filename)
-print("Lines: " + str(len(full_data)))
-print("Not commented lines: " + str(len(drop_comments(full_data))))
-print("Format: " + block_headers[1])
-print("Format (numbered): " + str(data_blocks) + "\n")
+    # Printing file information
+    print("File: " + filename)
+    print("Lines: " + str(len(full_data)))
+    print("Not commented lines: " + str(len(drop_comments(full_data))))
+    print("Format: " + block_headers[1])
+    print("Format (numbered): " + str(data_blocks) + "\n")
 
-# Printing data with titles
-print_all_titles(titles, config_values, data_blocks)
+    # Printing data with titles
+    print_all_titles(titles, config_values, data_blocks)
+
+if option == "check":
+    # Check for errors in empty spaces
+    check_errors(data_blocks, config_values)
