@@ -28,7 +28,8 @@
 '''
 
 '''
-Aleph configuration files have (at least) two styles of defining column names. Currently this script supports only one of them.
+- Check option checks if there are non-whitespace values in places where should be whitespace.
+- Print option prints configuration files lines with column headers. Supports only files with values like "COL.  1" in the table key.
 '''
 
 import sys, re
@@ -58,6 +59,41 @@ def read_length(data):
                 frame.append(i)
                 return frame
 
+# Check for sequence "!!" when not and end of line
+def is_exclamation_was_not_line_not_last(data, index, latest_char):
+    if data[index] == "!" and index != (len(data) - 1) and latest_char != "-":
+        return True
+    else:
+        return False
+
+# Check for sequence "-!" when not at end of line
+def is_exclamation_was_line_not_last(data, index, latest_char):
+    if data[index] == "!" and index != (len(data) - 1) and latest_char == "-":
+        return True
+    else:
+        return False
+
+# Check for sequence "!-"
+def is_line_was_exclamation(data, index, latest_char):
+    if data[index] == "-" and latest_char == "!":
+        return True
+    else:
+        return False
+
+# Check for sequence "--"
+def is_line_was_line(data, index, latest_char):
+    if data[index] == "-" and latest_char == "-":
+        return True
+    else:
+        return False
+
+# Check for ending sequence (line ends always with "!" or ">")
+def is_ending(data, index):
+    if (data[index] == "!" or data[index] == ">") and index == (len(data) - 1 ):
+        return True
+    else:
+        return False
+
 # Calculate configuration blocks, return list of tuples (block length, spaces between)
 def calculate_blocks(data):
     latest_char = ""
@@ -66,15 +102,15 @@ def calculate_blocks(data):
     block_sizes = []
     space_sizes = []
     for i in range(len(data)):
-        if data[i] == "!" and i != (len(data) - 1) and latest_char != "-":
+        if is_exclamation_was_not_line_not_last(data, i, latest_char):
             block_size += 1
             latest_char = "!"
-        elif data[i] == "!" and i != (len(data) - 1) and latest_char == "-":
+        elif is_exclamation_was_line_not_last(data, i, latest_char):
             space_sizes.append(space_size)
             space_size = 0
             block_size += 1
             latest_char = "!"
-        elif (data[i] == "!" or data[i] == ">") and i == (len(data) - 1 ):
+        elif is_ending(data, i):
             block_size += 1
             if increase_last_block_size == 1:
                 block_sizes.append(100)
@@ -84,12 +120,12 @@ def calculate_blocks(data):
                 block_sizes.append(block_size)
                 space_sizes.append(space_size)
                 space_sizes.append(0)
-        elif data[i] == "-" and latest_char == "!":
+        elif is_line_was_exclamation(data, i, latest_char):
             space_size += 1
             block_sizes.append(block_size)
             block_size = 0
             latest_char = "-"
-        elif data[i] == "-" and latest_char == "-":
+        elif is_line_was_line(data, i, latest_char):
             space_size += 1
         else:
             block_sizes.append(block_size)
@@ -166,7 +202,7 @@ def check_errors(blocks, values):
             if (re.compile(r'\S').search(empty_block)) is not None:
                 found = 1
         if found == 1:
-            print("ERROR: Invalid value found in empty space at following line:")
+            print("[ERROR] Empty block contains a value in following line:")
             print(i)
 
 # Check if file is given in arguments
