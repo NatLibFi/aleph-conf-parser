@@ -1,13 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 '''
  *
  * The following is the entire license notice for the Python code in this file.
  *
  * Parser for Aleph configuration files
  *
- * Copyright (C) 2017 University Of Helsinki (The National Library Of Finland)
+ * Copyright (C) 2017-2018 University Of Helsinki (The National Library Of Finland)
  *
  * aleph-conf-parser program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -26,26 +23,20 @@
  * for the Python code in this file.
  *
 '''
-
-'''
-- Check option checks if there are non-whitespace values in places where should be whitespace.
-- Print option prints configuration files lines with column headers. Supports only files with values like "COL.  1" in the table key.
-'''
-
-import sys, re
+import re
 
 # Read file, deletes newline, return list
 def read_file(filename):
     with open(filename, 'r') as f:
         return [x.strip() for x in f]
 
-# Drop comments, return list 
+# Drop comments, return list
 def drop_comments(data):
     comment_re = re.compile('^[^\!]')
     new_list = filter(comment_re.match,data)
     return new_list
 
-# Read length of conf fields, return list 
+# Read length of conf fields, return list
 def read_length(data):
     frame = []
     end = 0
@@ -96,6 +87,7 @@ def is_ending(data, index):
 
 # Calculate configuration blocks, return list of tuples (block length, spaces between)
 def calculate_blocks(data):
+    increase_last_block_size = 1 #Overrides last block size with 100
     latest_char = ""
     block_size = 0
     space_size = 0
@@ -132,7 +124,7 @@ def calculate_blocks(data):
             block_size = 0
     return zip(block_sizes, space_sizes)
 
-# Use blocks to read values from data, return list of strings 
+# Use blocks to read values from data, return list of strings
 def parse_row(blocks, data):
     my_data = []
     current_index = 0
@@ -204,37 +196,3 @@ def check_errors(blocks, values):
         if found == 1:
             print("[ERROR] Empty block contains a value in following line:")
             print(i)
-
-# Check if file is given in arguments
-if len(sys.argv) != 3:
-    print("Usage: $0 <file> <option>")
-    print("Options: print/check")
-    sys.exit()
-
-filename = sys.argv[1]
-option = sys.argv[2]
-increase_last_block_size = 1 #Overrides last block size with 100
-full_data = read_file(filename)
-config_values = drop_comments(full_data)
-block_headers = read_length(full_data)
-data_blocks = calculate_blocks(block_headers[1])
-configurations = parse_all(data_blocks, config_values)
-
-# Aleph configs titles aren't consistent. Could make option for custom titles.
-titles = get_titles(full_data)
-
-if option == "print":
-
-    # Printing file information
-    print("File: " + filename)
-    print("Lines: " + str(len(full_data)))
-    print("Not commented lines: " + str(len(drop_comments(full_data))))
-    print("Format: " + block_headers[1])
-    print("Format (numbered): " + str(data_blocks) + "\n")
-
-    # Printing data with titles
-    print_all_titles(titles, config_values, data_blocks)
-
-if option == "check":
-    # Check for errors in empty spaces
-    check_errors(data_blocks, config_values)
