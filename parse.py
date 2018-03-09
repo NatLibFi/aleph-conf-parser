@@ -39,15 +39,17 @@ def drop_comments(data):
 # Read length of conf fields, return list
 def read_length(data):
     frame = []
-    end = 0
-    for i in data:
-        if re.match('^!\s+[0-9]\s+[0-9]\s+[0-9]', i) or end == 1:
-            if re.match('^!\s+[0-9]\s+[0-9]\s+[0-9]', i):
+    start = 1
+    # Iterate on reversed order so that we find the actual configuration and not an example of the configuration...
+    for i in reversed(data):
+        if re.match('^!\s+[0-9]\s+[0-9]\s+[0-9]', i) or start == 1:
+            if re.match('^!{2,}', i):
                 frame.append(i)
-                end = 1
+                start = 0
                 continue
-            if end == 1:
+            if start == 0:
                 frame.append(i)
+                frame.reverse()
                 return frame
 
 # Check for sequence "!!" when not and end of line
