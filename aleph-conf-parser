@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+ *
+ * The following is the entire license notice for the Python code in this file.
+ *
+ * Parser for Aleph configuration files
+ *
+ * Copyright (C) 2017-2018 University Of Helsinki (The National Library Of Finland)
+ *
+ * aleph-conf-parser program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * aleph-conf-parser is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * The above is the entire license notice
+ * for the Python code in this file.
+ *
+'''
+
+'''
+- Check option checks if there are non-whitespace values in places where should be whitespace.
+- Print option prints configuration files lines with column headers. Supports only files with values like "COL.  1" in the table key.
+'''
+
+import sys
+from parse import *
+
+# Check if file is given in arguments
+if len(sys.argv) != 3:
+    print("Usage: aleph-conf-parser <file> <option>")
+    print("Options: print/check")
+    sys.exit()
+
+filename = sys.argv[1]
+option = sys.argv[2]
+full_data = read_file(filename)
+config_values = drop_comments(full_data)
+block_headers = read_length(full_data)
+data_blocks = calculate_blocks(block_headers[1])
+configurations = parse_all(data_blocks, config_values)
+
+# Aleph configs titles aren't consistent. Could make option for custom titles.
+titles = get_titles(full_data)
+
+if option == "print":
+
+    # Printing file information
+    print("File: " + filename)
+    print("Lines: " + str(len(full_data)))
+    print("Not commented lines: " + str(len(drop_comments(full_data))))
+    print("Format: " + block_headers[1])
+    print("Format (numbered): " + str(data_blocks) + "\n")
+
+    # Printing data with titles
+    print_all_titles(titles, config_values, data_blocks)
+
+if option == "check":
+    # Check for errors in empty spaces
+    check_errors(data_blocks, config_values)
