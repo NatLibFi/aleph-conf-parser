@@ -32,7 +32,7 @@
 '''
 
 import sys
-from parse import *
+from module import *
 
 # Check if file is given in arguments
 if len(sys.argv) != 3:
